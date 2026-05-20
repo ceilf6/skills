@@ -48,3 +48,11 @@ Use this rubric to assess issue quality. Start with type identification, then ev
 - A brief but perfectly clear issue can score 5/5.
 - A verbose but unfocused issue can score 2/5.
 - Brevity is not a penalty; lack of actionable information is.
+
+## Comment Calibration
+
+- A 5/5 issue should not receive a list of artificial improvements. Say it is ready and name any optional polish only if it would help maintainers.
+- A 4/5 issue usually needs at most one or two clarifying details.
+- A 3/5 issue should get targeted questions tied to actionability, not a full template checklist.
+- A 1-2/5 issue should be handled constructively: identify the first missing piece that would make the report understandable before asking for secondary details.
+- Priority and quality are separate. A low-quality report can describe a high-priority incident, and a high-quality report can describe a low-priority enhancement.
