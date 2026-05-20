@@ -61,3 +61,21 @@
 面向自动 CR 机器人的代码评审 skill，不关心变更来自代码托管平台、内部 CR 平台还是本地 diff，而是专注判断代码本身是否应该合入。
 
 它以代码级联影响和整体最优解为核心：优先检查调用方、执行流、公共契约、测试覆盖和迁移路径，再用 Karpathy Guidelines 约束评审标准，识别过度抽象、非必要重构、局部优化破坏整体优雅性、缺少验证等问题。输出只包含结构化 CR 报告、风险等级和建议结论，不负责发布评论或操作平台状态。
+
+# issue-reviewer
+面向 GitHub Issue 自动评审的 skill，对 Bug Report 和 Feature Request 进行结构化质量评估。
+
+评估维度包括完整性（复现步骤、环境信息、日志）、清晰度（标题质量、单一关注点、语言精确度）、可操作性（是否可立即开始工作、验收标准是否明确），并基于文本信号给出优先级建议（P0-P3）。输出结构化的 Issue Analysis 报告，不负责发布评论或操作平台状态。
+
+---
+
+## 与 repo-guard 的关系
+
+本仓库中的 `code-reviewer` 和 `issue-reviewer` skill 被 [ceilf6/repo-guard](https://github.com/ceilf6/repo-guard) 作为 GitHub Action 的评审知识源使用。
+
+| 仓库 | 职责 |
+|------|------|
+| `ceilf6/ceilf6-skills`（本仓库） | 评审知识：system prompt、评审标准、分析框架、评分规则 |
+| `ceilf6/repo-guard` | GitHub Action 执行层：事件监听、数据获取、LLM 调用、评论发布 |
+
+repo-guard 通过 git submodule 引用本仓库，运行时始终拉取最新版 skill。更新评审逻辑只需修改本仓库中的 skill 文件，无需改动 repo-guard 代码。
