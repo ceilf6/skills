@@ -35,3 +35,37 @@ Prefer GitNexus or an equivalent code graph for this evidence. If graph evidence
 - `degraded`: graph evidence is unavailable, stale, unmapped, or contradicted by the diff.
 
 Use `NEEDS_HUMAN` instead of `APPROVE` when confidence is degraded and the change touches shared, critical, or public-contract code.
+
+## Fallback: No Code Graph Available
+
+When no code graph (GitNexus or equivalent) is available, use these diff-based heuristics:
+
+### Evidence Gathering
+
+- Use `git diff --stat` to identify all changed files and their change magnitude.
+- Identify exported/public symbols that changed signature, return type, or behavior from the diff hunks.
+- Use text search (grep) to find callers of changed symbols outside the changeset.
+- Check if changed function parameters, return shapes, or error behaviors have consumers not visible in the diff.
+
+### Confidence Rules
+
+- Default to `degraded` confidence when operating without a graph.
+- Upgrade to `medium` only if the diff clearly shows all affected callers are updated within the changeset.
+- Never claim `high` confidence without graph evidence.
+
+### Blocking Signals (Still Apply)
+
+Even without a graph, flag these as blocking:
+
+- A function signature changes but the diff doesn't update all call sites visible via text search.
+- A shared utility changes behavior but only one caller's usage pattern is addressed.
+- A public API, route, or schema changes without migration or version handling.
+- A config key is renamed or removed without checking all references.
+
+### Evidence Labeling
+
+When reporting findings from text search rather than graph traversal, note the evidence source:
+
+- `(graph)` — found via code knowledge graph (high confidence)
+- `(text search)` — found via grep/text matching (lower confidence, may have false positives)
+- `(inferred)` — inferred from code patterns but not directly confirmed

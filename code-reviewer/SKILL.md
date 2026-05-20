@@ -27,7 +27,7 @@ Assume the caller provides or can access change metadata, diff, changed files, b
 
 1. Read [references/review-rubric.md](references/review-rubric.md).
 2. Read [references/cascade-analysis.md](references/cascade-analysis.md).
-3. Read `$karpathy-guidelines` when available; otherwise apply the Karpathy checklist summarized in the rubric.
+3. Read [references/karpathy-checklist.md](references/karpathy-checklist.md).
 4. Judge the change through cascade evidence first, then diff evidence. Check whether direct callers, affected flows, tests, public contracts, and migration paths remain coherent.
 5. Produce the report only. Do not post platform comments, submit reviews, resolve threads, push commits, or mutate repository state.
 
