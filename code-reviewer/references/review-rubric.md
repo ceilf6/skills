@@ -47,3 +47,50 @@ Every finding needs concrete evidence:
 - smallest viable fix direction
 
 When evidence is incomplete, say so and downgrade certainty. Do not invent missing tool output.
+
+## GitHub Comment Quality
+
+Repo Guard may publish this report directly as a PR review. Optimize for a reviewer scanning the comment under time pressure.
+
+### Decision Summary
+
+The first screen should answer three questions:
+
+- Can this merge now?
+- If not, what is the highest-risk blocker?
+- What is the smallest next action?
+
+Use one direct sentence. Do not repeat the full findings list.
+
+### Finding Threshold
+
+Include a finding only when it changes one of these outcomes:
+
+- merge decision
+- required follow-up before merge
+- test or verification confidence
+- maintainability risk for a touched shared path
+
+Do not include style preferences, speculative rewrites, or broad advice unless they hide real risk.
+
+### Inline Comment Hygiene
+
+Use inline comments for line-specific defects only. A good inline comment is short, anchored, and fix-oriented.
+
+Good:
+
+```markdown
+[scripts/review.mjs:42] This accepts `0` as a PR number, which later calls `/pulls/0`; reject non-positive integers before the API call.
+```
+
+Avoid:
+
+```markdown
+[scripts/review.mjs:42] Consider improving validation.
+```
+
+If the same root cause appears on several lines, leave one representative inline comment and summarize the broader issue once in the main findings.
+
+### No-Finding Reviews
+
+When no blocking findings exist, do not produce a hollow approval. State what evidence was inspected, why the recommendation is non-blocking, and any residual risk caused by missing graph evidence, truncated diffs, or absent tests.

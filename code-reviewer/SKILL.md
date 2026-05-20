@@ -38,6 +38,17 @@ Assume the caller provides or can access change metadata, diff, changed files, b
 - Architecture preservation outranks isolated cleverness.
 - Minimal, surgical fixes outrank speculative abstractions.
 - Verifiable behavior outranks plausible explanations.
+- Reviewer actionability outranks exhaustive commentary.
+
+## Comment Quality Rules
+
+Write for a maintainer deciding whether to merge now. Lead with the decision, the highest-risk reason, and the next action. Keep the report compact enough to scan in a GitHub review email.
+
+- Include only findings that affect correctness, merge risk, maintainability, or verification confidence.
+- Make every finding actionable: name the observed problem, why it matters after merge, and the smallest viable fix.
+- Avoid restating the same issue in multiple sections. Summarize categories in the top-level report and reserve line-specific detail for inline findings.
+- If there are no blocking findings, say what was checked, what residual risk remains, and what verification evidence would increase confidence.
+- Do not add generic praise, generic best-practice advice, or template filler.
 
 ## Output Contract
 
@@ -48,6 +59,7 @@ Return this structure:
 
 **Risk:** LOW | MEDIUM | HIGH | CRITICAL
 **Recommendation:** APPROVE | COMMENT | REQUEST_CHANGES | NEEDS_HUMAN
+**Decision Summary:** <one sentence stating merge readiness and the main reason>
 
 ### Cascade Analysis
 - Changed symbols:
@@ -60,6 +72,11 @@ Return this structure:
    - Evidence:
    - Affected callers/flows:
    - Smallest viable fix:
+
+### Inline Findings
+- Use `[path/to/file.ext:42] <concise line-specific issue and fix direction>` only for issues that belong on a specific changed line.
+- Do not duplicate every inline finding in the top-level findings list. If multiple line comments share the same root cause, summarize the root cause once above.
+- Omit this section when there are no line-specific findings.
 
 ### Karpathy Review
 - Assumptions:
