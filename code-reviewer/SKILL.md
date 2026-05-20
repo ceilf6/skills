@@ -55,6 +55,9 @@ Write for a maintainer deciding whether to merge now. Lead with the decision, th
 ## Output Contract
 
 Keep all headings and bold marker labels exactly as written in this contract, even when responding in Chinese or another language. Localize the values and narrative text, not the marker keys.
+The first line must be exactly `## CR Report: <change id or title>`, not `# CR Report` or any localized heading.
+Do not add extra headings outside the output contract. Put all analysis inside the listed sections.
+Inline finding bullets must begin with `- [` so repo-guard can parse them; do not wrap the `[path:line]` marker in backticks.
 
 Examples:
 

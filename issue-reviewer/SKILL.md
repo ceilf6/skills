@@ -50,6 +50,8 @@ Write for two readers at once: the maintainer triaging the queue and the reporte
 - Ask only for the smallest missing information that would materially change actionability.
 - Convert rubric gaps into concrete requests, not abstract labels.
 - If the issue is already actionable, avoid filler suggestions; state that no required reporter action remains and include at most one optional polish item.
+- When `Maintainer Next Action` is `Ready to work`, `### Suggestions` must contain only `No required reporter action remains` plus at most one optional polish bullet.
+- Do not ask for alternatives, impact scope, or extra context when the issue is already actionable; put minor maintainer considerations in `### Summary` only if they materially affect implementation.
 - When the reporter is frustrated, acknowledge the impact briefly before asking for details.
 - Match the dominant language of the issue unless the caller explicitly asks for another language.
 
