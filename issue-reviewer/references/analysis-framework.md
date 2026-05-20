@@ -59,6 +59,19 @@ For each issue type, verify the presence of required information:
 - Are there blocking decisions that need to be made first?
 - Is the required context available or does it need to be gathered?
 
+### Maintainer Next Action
+
+Choose the one next action that best helps triage:
+
+| Action | Use When |
+| --- | --- |
+| Ready to work | The issue is actionable enough for implementation or investigation to start. |
+| Ask reporter | A specific missing detail blocks progress and only the reporter can provide it. |
+| Needs triage decision | The issue is clear, but maintainers must decide priority, product direction, or scope. |
+| Needs reproduction | A bug is plausible but cannot be verified or isolated from the current report. |
+
+Use this action to shape the summary and suggestions. Do not ask the reporter for information that would not change the next action.
+
 ## Constructive Feedback Principles
 
 When writing suggestions:
@@ -69,6 +82,35 @@ When writing suggestions:
 4. **Offer templates**: If information is missing, suggest the format it should take.
 5. **Limit suggestions**: 2-4 actionable items. More than that overwhelms.
 6. **Match tone**: If the reporter is frustrated, acknowledge the frustration before asking for details.
+
+## Reporter-Facing Suggestion Quality
+
+Convert rubric labels into direct, answerable requests.
+
+Good:
+
+```markdown
+- Please add the exact version and OS where this happens; that will help determine whether this is platform-specific.
+- If possible, add the shortest set of steps that triggers the crash, starting from a clean launch.
+```
+
+Avoid:
+
+```markdown
+- Environment info is missing.
+- Reproduction steps are incomplete.
+```
+
+## Minimum Useful Questions
+
+Ask fewer questions when one answer would unblock the issue. Prefer the highest-value missing detail:
+
+- For a crash: exact error/log and trigger steps.
+- For a regression: last working version and first broken version.
+- For a feature request: user problem and observable acceptance criteria.
+- For a question: expected outcome and what has already been tried.
+
+If an issue is ready to work, use suggestions for optional polish only, or state that no required reporter action remains.
 
 ## Language Matching
 

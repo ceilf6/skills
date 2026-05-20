@@ -40,6 +40,18 @@ Assume the caller provides or can access the issue title, body, labels, and any 
 - Constructive suggestions outrank criticism.
 - Reporter's intent outranks template compliance.
 - Practical impact outranks theoretical concerns.
+- The next useful maintainer action outranks exhaustive scoring detail.
+
+## Comment Quality Rules
+
+Write for two readers at once: the maintainer triaging the queue and the reporter who may need to improve the issue. The comment should make the next action obvious without making the reporter feel graded.
+
+- Lead with whether the issue is ready to work, needs reporter clarification, or needs maintainer triage.
+- Ask only for the smallest missing information that would materially change actionability.
+- Convert rubric gaps into concrete requests, not abstract labels.
+- If the issue is already actionable, avoid filler suggestions; acknowledge readiness and note any minor optional improvement.
+- When the reporter is frustrated, acknowledge the impact briefly before asking for details.
+- Match the dominant language of the issue unless the caller explicitly asks for another language.
 
 ## Output Contract
 
@@ -51,6 +63,7 @@ Return this structure:
 **Quality Score:** X/5
 **Priority Suggestion:** P0-Critical | P1-High | P2-Medium | P3-Low
 **Type:** Bug Report | Feature Request | Question | Discussion
+**Maintainer Next Action:** Ready to work | Ask reporter | Needs triage decision | Needs reproduction
 
 ### Completeness
 - Problem statement: clear / vague / missing
@@ -71,7 +84,7 @@ Return this structure:
 - Dependencies: identified / not applicable / unknown
 
 ### Suggestions
-- <specific, constructive suggestions for improving this issue>
+- <2-4 specific, constructive suggestions or questions. Omit filler when the issue is already ready to work.>
 
 ### Summary
 <1-2 sentence overall assessment>
