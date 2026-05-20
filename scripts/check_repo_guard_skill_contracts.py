@@ -12,6 +12,7 @@ REQUIRED_TEXT = {
         "**Recommendation:** APPROVE | COMMENT | REQUEST_CHANGES | NEEDS_HUMAN",
         "**Decision Summary:**",
         "[path/to/file.ext:42]",
+        "Keep all headings and bold marker labels exactly as written",
         "Do not publish or mutate anything on any review platform",
     ],
     "code-reviewer/references/review-rubric.md": [
