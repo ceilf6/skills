@@ -48,6 +48,7 @@ Write for a maintainer deciding whether to merge now. Lead with the decision, th
 - Make every finding actionable: name the observed problem, why it matters after merge, and the smallest viable fix.
 - Avoid restating the same issue in multiple sections. Summarize categories in the top-level report and reserve line-specific detail for inline findings.
 - Inline findings must start with bracketed `[path:line]` syntax so repo-guard can extract GitHub inline comments. Use `[path/to/file.ext:42] <concise issue and fix direction>`; do not use code spans like ``path/to/file.ext:42`` without brackets. Omit inline findings when no issue belongs on a specific changed line.
+- Inline findings should target the exact changed line from the diff hunk, not a nearby context line, closing brace, or unchanged caller. If the exact changed line number is unavailable, keep the issue in `### Findings` instead of inventing an inline location.
 - If there are no blocking findings, say what was checked, what residual risk remains, and what verification evidence would increase confidence.
 - Do not add generic praise, generic best-practice advice, or template filler.
 
@@ -83,7 +84,7 @@ Return this structure:
    - Smallest viable fix:
 
 ### Inline Findings
-- [path/to/file.ext:42] <concise issue and fix direction>
+- [path/to/file.ext:42] <issue on the changed code at line 42 and smallest fix direction>
 
 ### Karpathy Review
 - Assumptions:
