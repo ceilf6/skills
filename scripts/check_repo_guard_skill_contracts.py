@@ -38,6 +38,12 @@ REQUIRED_TEXT = {
     ],
 }
 
+FORBIDDEN_TEXT = {
+    "code-reviewer/SKILL.md": [
+        "### Inline Findings\n- Use `[path/to/file.ext:42]",
+    ],
+}
+
 
 def main() -> int:
     failures = []
@@ -51,6 +57,16 @@ def main() -> int:
         for snippet in required_snippets:
             if snippet not in content:
                 failures.append(f"{relative_path}: missing {snippet!r}")
+
+    for relative_path, forbidden_snippets in FORBIDDEN_TEXT.items():
+        path = ROOT / relative_path
+        if not path.exists():
+            continue
+
+        content = path.read_text(encoding="utf-8")
+        for snippet in forbidden_snippets:
+            if snippet in content:
+                failures.append(f"{relative_path}: contains forbidden template text {snippet!r}")
 
     if failures:
         print("Repo Guard skill contract check failed:", file=sys.stderr)

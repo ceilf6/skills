@@ -47,6 +47,7 @@ Write for a maintainer deciding whether to merge now. Lead with the decision, th
 - Include only findings that affect correctness, merge risk, maintainability, or verification confidence.
 - Make every finding actionable: name the observed problem, why it matters after merge, and the smallest viable fix.
 - Avoid restating the same issue in multiple sections. Summarize categories in the top-level report and reserve line-specific detail for inline findings.
+- For line-specific issues, use `[path/to/file.ext:42] <concise issue and fix direction>`. Omit inline findings when no issue belongs on a specific changed line.
 - If there are no blocking findings, say what was checked, what residual risk remains, and what verification evidence would increase confidence.
 - Do not add generic praise, generic best-practice advice, or template filler.
 
@@ -74,9 +75,7 @@ Return this structure:
    - Smallest viable fix:
 
 ### Inline Findings
-- Use `[path/to/file.ext:42] <concise line-specific issue and fix direction>` only for issues that belong on a specific changed line.
-- Do not duplicate every inline finding in the top-level findings list. If multiple line comments share the same root cause, summarize the root cause once above.
-- Omit this section when there are no line-specific findings.
+- <line-specific `[path:line]` findings, or omit this section when none apply>
 
 ### Karpathy Review
 - Assumptions:
