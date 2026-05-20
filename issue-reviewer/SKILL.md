@@ -49,9 +49,19 @@ Write for two readers at once: the maintainer triaging the queue and the reporte
 - Lead with whether the issue is ready to work, needs reporter clarification, or needs maintainer triage.
 - Ask only for the smallest missing information that would materially change actionability.
 - Convert rubric gaps into concrete requests, not abstract labels.
-- If the issue is already actionable, avoid filler suggestions; acknowledge readiness and note any minor optional improvement.
+- If the issue is already actionable, avoid filler suggestions; state that no required reporter action remains and include at most one optional polish item.
 - When the reporter is frustrated, acknowledge the impact briefly before asking for details.
 - Match the dominant language of the issue unless the caller explicitly asks for another language.
+
+## Output Label Invariants
+
+Keep all headings and bold marker labels exactly as written in the output contract, even when responding in Chinese or another language. Localize the values and narrative text, not the marker keys.
+
+Examples:
+
+- Use `**Quality Score:** 2/5`, not `**质量评分:** 2/5`.
+- Use `**Priority Suggestion:** P1-High`, not `**优先级建议:** P1-高`.
+- Use `**Maintainer Next Action:** Ask reporter`, not `**维护者下一步动作:** 询问报告者`.
 
 ## Output Contract
 
@@ -84,7 +94,7 @@ Return this structure:
 - Dependencies: identified / not applicable / unknown
 
 ### Suggestions
-- <2-4 specific, constructive suggestions or questions. Omit filler when the issue is already ready to work.>
+- <2-3 specific, constructive suggestions or questions. If `Maintainer Next Action` is `Ready to work`, state "No required reporter action remains" and include at most one optional polish item.>
 
 ### Summary
 <1-2 sentence overall assessment>
