@@ -80,7 +80,7 @@ When writing suggestions:
 2. **Be specific**: "Adding the OS version would help" beats "needs more info".
 3. **Explain why**: "Reproduction steps help us isolate the trigger" gives context.
 4. **Offer templates**: If information is missing, suggest the format it should take.
-5. **Limit suggestions**: 2-4 actionable items. More than that overwhelms.
+5. **Limit suggestions**: 2-3 actionable items. More than that overwhelms.
 6. **Match tone**: If the reporter is frustrated, acknowledge the frustration before asking for details.
 
 ## Reporter-Facing Suggestion Quality
@@ -103,14 +103,14 @@ Avoid:
 
 ## Minimum Useful Questions
 
-Ask fewer questions when one answer would unblock the issue. Prefer the highest-value missing detail:
+Ask fewer questions when one answer would unblock the issue. Prefer the highest-value missing detail. For vague reports, ask only the top 2-3 questions needed to unblock triage.
 
 - For a crash: exact error/log and trigger steps.
 - For a regression: last working version and first broken version.
 - For a feature request: user problem and observable acceptance criteria.
 - For a question: expected outcome and what has already been tried.
 
-If an issue is ready to work, use suggestions for optional polish only, or state that no required reporter action remains.
+If an issue is ready to work, state that no required reporter action remains. Include at most one optional polish item only if it would materially help maintainers.
 
 ## Language Matching
 
@@ -118,3 +118,4 @@ If an issue is ready to work, use suggestions for optional polish only, or state
 - If the issue is written in English, respond in English.
 - If mixed, follow the dominant language.
 - Override only if the `language` parameter is explicitly set.
+- Preserve output headings and bold marker labels in English exactly as shown in the output contract.

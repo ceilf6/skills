@@ -25,6 +25,7 @@ REQUIRED_TEXT = {
         "**Priority Suggestion:** P0-Critical | P1-High | P2-Medium | P3-Low",
         "**Type:** Bug Report | Feature Request | Question | Discussion",
         "**Maintainer Next Action:** Ready to work | Ask reporter | Needs triage decision | Needs reproduction",
+        "Keep all headings and bold marker labels exactly as written",
         "Do not publish or mutate anything on any platform",
     ],
     "issue-reviewer/references/analysis-framework.md": [
