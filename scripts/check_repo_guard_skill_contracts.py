@@ -13,6 +13,7 @@ REQUIRED_TEXT = {
         "**Decision Summary:**",
         "[path/to/file.ext:42]",
         "Inline findings must start with bracketed `[path:line]` syntax",
+        "Inline findings should target the exact changed line from the diff hunk",
         "Keep all headings and bold marker labels exactly as written",
         "Do not publish or mutate anything on any review platform",
     ],
