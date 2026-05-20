@@ -53,6 +53,14 @@ Write for a maintainer deciding whether to merge now. Lead with the decision, th
 
 ## Output Contract
 
+Keep all headings and bold marker labels exactly as written in this contract, even when responding in Chinese or another language. Localize the values and narrative text, not the marker keys.
+
+Examples:
+
+- Use `**Risk:** HIGH`, not `**风险等级:** HIGH`.
+- Use `**Recommendation:** REQUEST_CHANGES`, not `**建议:** REQUEST_CHANGES`.
+- Use `**Decision Summary:** ...`, not `**决策摘要:** ...`.
+
 Return this structure:
 
 ```markdown
