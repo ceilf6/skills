@@ -1,96 +1,96 @@
-# Review Rubric
+# 评审准则
 
-Use this rubric to decide what matters in code review. Start with system impact, then inspect code quality through the Karpathy lens.
+用这份准则判断代码评审中真正重要的事项。先看系统影响，再用 Karpathy 视角检查代码质量。
 
-## Severity
+## 严重程度
 
-| Severity | Use When |
+| 严重程度 | 使用场景 |
 | --- | --- |
-| Critical | Merge can break production-critical flows, security, data integrity, auth, payments, irreversible writes, or broad public contracts. |
-| High | Direct callers, API consumers, migrations, or affected execution flows are broken or unhandled. |
-| Medium | The change likely works locally but weakens maintainability, omits important tests, introduces avoidable coupling, or makes future changes harder. |
-| Low | Minor clarity, naming, or cleanup issue that does not affect behavior or architecture. |
+| 致命 | 合并后可能破坏生产关键流程、安全、数据完整性、认证、支付、不可逆写入或广泛公共契约。 |
+| 高 | 直接调用方、API 消费者、迁移路径或受影响执行流程已经破坏或未处理。 |
+| 中 | 变更局部可能可用，但削弱可维护性、遗漏重要测试、引入可避免耦合，或让后续变更更困难。 |
+| 低 | 不影响行为或架构的轻微信息清晰度、命名或清理问题。 |
 
-## Cascade-First Checks
+## 级联优先检查
 
-- Identify changed symbols, public interfaces, route/tool contracts, schemas, config keys, and shared helpers.
-- Inspect d=1 upstream callers first. Any caller outside the changeset that still expects old behavior is a blocking finding.
-- Inspect d=2/d=3 flows when the changed symbol is central, reused, or part of critical workflows.
-- Check whether tests cover the affected flows, not only the edited files.
-- Treat broad shared utilities, framework hooks, middleware, permission paths, and data models as higher risk than isolated leaf code.
+- 识别被修改的符号、公共接口、route/tool 契约、schema、配置键和共享 helper。
+- 优先检查 d=1 上游直接调用方。若变更集外的调用方仍期待旧行为，这是 blocking finding。
+- 当被修改符号处于核心路径、复用范围广或关键工作流中时，继续检查 d=2/d=3 流程。
+- 检查测试是否覆盖受影响流程，而不只是覆盖被编辑文件。
+- 对广泛共享工具、框架 hook、中间件、权限路径和数据模型，按高于叶子代码的风险处理。
 
-## Karpathy Review Standard
+## Karpathy 评审标准
 
-- **Assumptions surfaced:** flag unclear product intent, ambiguous compatibility promises, or hidden migration assumptions.
-- **Simplicity first:** flag speculative abstractions, over-configurability, unnecessary generic helpers, and large solutions to small problems.
-- **Surgical changes:** flag unrelated refactors, formatting churn, drive-by cleanup, or changes whose lines do not trace to the stated goal.
-- **Goal-driven verification:** flag missing tests for invalid inputs, changed contracts, affected callers, regression paths, or user-visible behavior.
+- **Assumptions surfaced:** 标出不清晰的产品意图、模糊的兼容承诺或隐藏迁移假设。
+- **Simplicity first:** 标出猜测性抽象、过度配置、不必要的通用 helper，以及小问题上的大型方案。
+- **Surgical changes:** 标出无关重构、格式噪声、顺手清理，或无法追溯到既定目标的变更行。
+- **Goal-driven verification:** 标出缺少无效输入、变更契约、受影响调用方、回归路径或用户可见行为测试的问题。
 
-## Whole-System Elegance
+## 全系统优雅性
 
-Flag changes that are locally tidy but globally worse:
+如果变更局部整洁但整体更差，需要指出：
 
-- A local wrapper or abstraction duplicates an existing pattern instead of using it.
-- A special case patches one caller while leaving sibling flows inconsistent.
-- A signature or schema change makes downstream code more complex without a clear system-level payoff.
-- A new dependency or layer solves a one-off problem.
-- A "cleanup" erases compatibility, diagnostics, observability, or failure handling that other flows rely on.
+- 本地 wrapper 或抽象没有复用既有模式，反而重复了一套模式。
+- 特例只修补了一个调用方，留下兄弟流程不一致。
+- 签名或 schema 变更让下游代码更复杂，却没有清晰的系统级收益。
+- 新依赖或新层级只解决一次性问题。
+- 所谓“清理”删除了其他流程依赖的兼容性、诊断能力、可观测性或失败处理。
 
-## Evidence Standard
+## 证据标准
 
-Every finding needs concrete evidence:
+每个发现都需要具体证据：
 
-- file and line when available
-- diff hunk or symbol name
-- affected caller, flow, contract, or test gap
-- why the issue matters after merge
-- smallest viable fix direction
+- 可用时给出文件和行号
+- diff hunk 或符号名
+- 受影响调用方、流程、契约或测试缺口
+- 为什么合并后会有影响
+- 最小可行修复方向
 
-When evidence is incomplete, say so and downgrade certainty. Do not invent missing tool output.
+证据不完整时，要明确说明并降低确定性。不要编造缺失的工具输出。
 
-## GitHub Comment Quality
+## GitHub 评论质量
 
-Repo Guard may publish this report directly as a PR review. Optimize for a reviewer scanning the comment under time pressure.
+Repo Guard 可能直接把这份报告发布为 PR review。面向时间紧张的评审者优化可扫读性。
 
-### Decision Summary
+### 决策摘要
 
-The first screen should answer three questions:
+第一屏要回答三个问题：
 
-- Can this merge now?
-- If not, what is the highest-risk blocker?
-- What is the smallest next action?
+- 现在能合并吗？
+- 如果不能，最高风险阻塞项是什么？
+- 最小下一步动作是什么？
 
-Use one direct sentence. Do not repeat the full findings list.
+用一句直接的话回答。不要重复完整 findings 列表。
 
-### Finding Threshold
+### 发现阈值
 
-Include a finding only when it changes one of these outcomes:
+只有当问题会改变以下结果之一时才纳入 finding：
 
-- merge decision
-- required follow-up before merge
-- test or verification confidence
-- maintainability risk for a touched shared path
+- 合并决策
+- 合并前必须完成的后续动作
+- 测试或验证信心
+- 被触碰共享路径的可维护性风险
 
-Do not include style preferences, speculative rewrites, or broad advice unless they hide real risk.
+不要纳入风格偏好、猜测性重写或宽泛建议，除非它们掩盖真实风险。
 
-### Inline Comment Hygiene
+### 行级评论卫生
 
-Use inline comments for line-specific defects only. A good inline comment is short, anchored, and fix-oriented.
+inline comment 只用于明确归属于某一行的缺陷。好的行级评论短、锚定明确、指向修复。
 
-Good:
-
-```markdown
-[scripts/review.mjs:42] This accepts `0` as a PR number, which later calls `/pulls/0`; reject non-positive integers before the API call.
-```
-
-Avoid:
+好例子：
 
 ```markdown
-[scripts/review.mjs:42] Consider improving validation.
+[scripts/review.mjs:42] 这里会接受 `0` 作为 PR number，随后调用 `/pulls/0`；应在 API 调用前拒绝非正整数。
 ```
 
-If the same root cause appears on several lines, leave one representative inline comment and summarize the broader issue once in the main findings.
+避免：
 
-### No-Finding Reviews
+```markdown
+[scripts/review.mjs:42] 考虑改进校验。
+```
 
-When no blocking findings exist, do not produce a hollow approval. State what evidence was inspected, why the recommendation is non-blocking, and any residual risk caused by missing graph evidence, truncated diffs, or absent tests.
+同一根因出现在多行时，选择一处代表性 inline comment，并在主 findings 中总结更广影响。
+
+### 无发现评审
+
+没有 blocking findings 时，不要产出空洞的 approval。说明检查了哪些证据、为什么 recommendation 是非阻塞的，以及图谱证据缺失、diff 截断或测试缺失带来的剩余风险。

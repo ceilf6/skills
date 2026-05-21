@@ -1,121 +1,113 @@
-# Analysis Framework
+# 分析框架
 
-Use this framework to structure your issue analysis. Evaluate each dimension independently, then synthesize into the final assessment.
+用这套框架组织 issue 分析。先独立评估每个维度，再合成为最终判断。
 
-## Completeness Check
+## 完整性检查
 
-For each issue type, verify the presence of required information:
+针对不同 issue 类型，确认是否包含必要信息：
 
-### Bug Report Checklist
-- [ ] What happened (actual behavior)
-- [ ] What should happen (expected behavior)
-- [ ] How to trigger it (reproduction steps)
-- [ ] Where it happens (environment, version, platform)
-- [ ] Evidence (logs, screenshots, error messages)
+### 缺陷报告检查清单
+- [ ] 发生了什么（actual behavior）
+- [ ] 应该发生什么（expected behavior）
+- [ ] 如何触发（reproduction steps）
+- [ ] 发生位置（environment、version、platform）
+- [ ] 证据（logs、screenshots、error messages）
 
-### Feature Request Checklist
-- [ ] What problem this solves (motivation)
-- [ ] What the solution looks like (proposal)
-- [ ] What else was considered (alternatives)
-- [ ] Who benefits (impact scope)
-- [ ] How to know it's done (acceptance criteria)
+### 功能请求检查清单
+- [ ] 解决什么问题（motivation）
+- [ ] 方案长什么样（proposal）
+- [ ] 如何判断完成（acceptance criteria）
+- [ ] 范围是否清楚（scope）
+- [ ] 是否存在会影响实现的外部依赖或决策
 
-### Missing Information Assessment
-- Mark as "missing" only if the information is necessary for the issue type.
-- Mark as "N/A" if the information doesn't apply (e.g., reproduction steps for a feature request).
-- Mark as "partial" if some information is present but insufficient to act on.
+### 缺失信息判断
+- 只有当信息对该 issue 类型必要时，才标为 `missing`。
+- 信息不适用时标为 `N/A`，例如 feature request 不需要 reproduction steps。
+- 信息存在但不足以行动时标为 `partial`。
 
-## Clarity Assessment
+## 清晰度评估
 
-### Title Analysis
-- Does the title identify the specific problem or request?
-- Could someone understand the issue from the title alone?
-- Is it specific enough to distinguish from similar issues?
+### 标题分析
+- 标题是否指出具体问题或请求？
+- 只看标题是否能理解 issue 大意？
+- 是否足够具体，能和相似 issue 区分？
 
-### Focus Analysis
-- Is there exactly one concern per issue?
-- If multiple concerns exist, could they be separate issues?
-- Does the body stay on topic or drift into tangents?
+### 聚焦度分析
+- 是否每个 issue 只有一个关注点？
+- 如果有多个关注点，是否应该拆成多个 issue？
+- 正文是否围绕主题，还是混入旁支？
 
-### Precision Analysis
-- Are vague terms avoided ("doesn't work", "broken", "slow")?
-- Are quantities specified where relevant ("takes 30s" vs "takes too long")?
-- Are conditions specified ("when X happens" vs "sometimes")?
+### 精确度分析
+- 是否避免了“不能用”“坏了”“很慢”等模糊说法？
+- 需要数量时是否给出量化信息，例如“30s”而不是“很慢”？
+- 条件是否明确，例如“当 X 发生时”而不是“有时候”？
 
-## Actionability Assessment
+## 可执行性评估
 
-### Readiness Check
-- Could a developer start working on this today?
-- What questions would they need answered first?
-- Are there implicit assumptions that need validation?
+### 准备度检查
+- 开发者今天能否开始处理？
+- 还有哪些问题必须先回答？
+- 是否存在需要验证的隐式假设？
 
-### Acceptance Criteria
-- Is it clear when this issue would be "done"?
-- Are success conditions measurable or observable?
-- Would two developers agree on whether a fix satisfies this issue?
+### 验收标准
+- 是否清楚什么状态算完成？
+- 成功条件是否可测量或可观察？
+- 两个开发者是否会对“是否满足该 issue”达成一致？
 
-### Dependency Check
-- Does this depend on other issues or external factors?
-- Are there blocking decisions that need to be made first?
-- Is the required context available or does it need to be gathered?
+### 依赖检查
+- 是否依赖其他 issue 或外部因素？
+- 是否存在必须先由维护者决定的 scope 或优先级问题？
+- 需要的上下文是否已给出，还是必须继续收集？
 
-### Maintainer Next Action
+### 维护者下一步动作
 
-Choose the one next action that best helps triage:
+选择最有助于分诊的单一下一步动作：
 
-| Action | Use When |
+| Action | 使用场景 |
 | --- | --- |
-| Ready to work | The issue is actionable enough for implementation or investigation to start. |
-| Ask reporter | A specific missing detail blocks progress and only the reporter can provide it. |
-| Needs triage decision | The issue is clear, but maintainers must decide priority, product direction, or scope. |
-| Needs reproduction | A bug is plausible but cannot be verified or isolated from the current report. |
+| 可以开始 | issue 已足够可执行，可以开始实现或调查。 |
+| 询问报告者 | 有一个具体缺失细节阻塞推进，且只有报告者能补充。 |
+| 需要分诊决策 | issue 很清楚，但维护者需要决定优先级、产品方向或范围。 |
+| 需要复现 | bug 可信，但当前报告无法验证或隔离。 |
 
-Use this action to shape the summary and suggestions. Do not ask the reporter for information that would not change the next action.
+用这个动作塑造 summary 和 suggestions。不要向报告者索要不会改变下一步动作的信息。
 
-## Constructive Feedback Principles
+## 建设性反馈原则
 
-When writing suggestions:
+写 suggestions 时遵循：
 
-1. **Acknowledge first**: Note what the reporter did well before suggesting improvements.
-2. **Be specific**: "Adding the OS version would help" beats "needs more info".
-3. **Explain why**: "Reproduction steps help us isolate the trigger" gives context.
-4. **Offer templates**: If information is missing, suggest the format it should take.
-5. **Limit suggestions**: 2-3 actionable items. More than that overwhelms.
-6. **Match tone**: If the reporter is frustrated, acknowledge the frustration before asking for details.
+1. **先承认有效信息**：指出报告者已经提供了什么有价值内容。
+2. **具体**：写“请补充 OS 版本”，不要写“信息不足”。
+3. **说明原因**：例如“复现步骤能帮助我们隔离触发条件”。
+4. **给出格式**：缺少信息时，建议报告者用什么格式补充。
+5. **限制数量**：2-3 条可执行建议即可，过多会造成负担。
+6. **匹配语气**：报告者焦虑或沮丧时，先承认影响，再请求细节。
 
-## Reporter-Facing Suggestion Quality
+## 面向报告者的建议质量
 
-Convert rubric labels into direct, answerable requests.
+把 rubric 标签转换成直接、可回答的请求。
 
-Good:
+好例子：
 
 ```markdown
-- Please add the exact version and OS where this happens; that will help determine whether this is platform-specific.
-- If possible, add the shortest set of steps that triggers the crash, starting from a clean launch.
+- 请补充出错时的具体版本和操作系统，这能帮助判断是否是平台相关问题。
+- 如果方便，请从一次干净启动开始，写下最短触发崩溃的步骤。
 ```
 
-Avoid:
+避免：
 
 ```markdown
 - Environment info is missing.
 - Reproduction steps are incomplete.
 ```
 
-## Minimum Useful Questions
+## 最小有用问题
 
-Ask fewer questions when one answer would unblock the issue. Prefer the highest-value missing detail. For vague reports, ask only the top 2-3 questions needed to unblock triage.
+少问问题。优先选择一个能解锁 issue 的最高价值问题。对模糊报告，只问能推进分诊的前 2-3 个问题。
 
-- For a crash: exact error/log and trigger steps.
-- For a regression: last working version and first broken version.
-- For a feature request: user problem and observable acceptance criteria.
-- For a question: expected outcome and what has already been tried.
+- 崩溃：精确错误日志和触发步骤。
+- 回归：最后可用版本和首个坏版本。
+- 功能请求：用户问题和可观察验收标准。
+- 问题咨询：期望结果和已经尝试过的方法。
 
-If an issue is ready to work, state that no required reporter action remains. Include at most one optional polish item only if it would materially help maintainers.
-
-## Language Matching
-
-- If the issue is written in Chinese, respond in Chinese.
-- If the issue is written in English, respond in English.
-- If mixed, follow the dominant language.
-- Override only if the `language` parameter is explicitly set.
-- Preserve output headings and bold marker labels in English exactly as shown in the output contract.
+如果 issue 已经 ready to work，说明 `No required reporter action remains`。只有在确实能帮助维护者时，才附加最多一条可选润色建议。
