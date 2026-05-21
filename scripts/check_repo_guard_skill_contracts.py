@@ -52,6 +52,30 @@ REQUIRED_TEXT = {
         "## 评论校准",
         "优先级和质量是两个独立判断",
     ],
+    "repo-guard-quality-evaluator/SKILL.md": [
+        "Repo Guard Quality Evaluator",
+        "npm run eval:quality",
+        "quality-eval-results",
+        "summary.json",
+        "pr-auth-bypass",
+        "pr-large-plus-small",
+        "issue-vague-crash",
+        "issue-ready-feature",
+        "不得提交 `quality-eval-results/`",
+        "不得打印、复述或提交 API key",
+        "必须阅读原始 `.md` 评论",
+        "repo-guard / skills / both",
+    ],
+    "repo-guard-quality-evaluator/agents/openai.yaml": [
+        "display_name: \"Repo Guard Quality Evaluator\"",
+        "short_description: \"Evaluate repo-guard review quality\"",
+        "default_prompt:",
+    ],
+    "README.md": [
+        "`repo-guard-quality-evaluator`",
+        "测评/诊断 skill",
+        "`code-reviewer` 和 `issue-reviewer` 是被测评的评论能力来源",
+    ],
 }
 
 FORBIDDEN_TEXT = {

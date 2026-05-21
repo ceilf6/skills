@@ -79,3 +79,5 @@
 | `ceilf6/repo-guard` | GitHub Action 执行层：事件监听、数据获取、LLM 调用、评论发布 |
 
 repo-guard 通过 git submodule 引用本仓库，运行时始终拉取最新版 skill。更新评审逻辑只需修改本仓库中的 skill 文件，无需改动 repo-guard 代码。
+
+`repo-guard-quality-evaluator` 是面向 repo-guard 的测评/诊断 skill，用来指导 agent 运行 repo-guard 仓库中的真实模型质量测评、读取 `summary.json` 和原始评论，并判断问题归因。`code-reviewer` 和 `issue-reviewer` 是被测评的评论能力来源，测评脚本和 fixture 仍以 repo-guard 仓库为唯一事实源。
