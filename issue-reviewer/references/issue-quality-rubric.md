@@ -1,58 +1,58 @@
-# Issue Quality Rubric
+# Issue 质量准则
 
-Use this rubric to assess issue quality. Start with type identification, then evaluate each dimension.
+用这份准则评估 issue 质量。先识别类型，再分别评估各维度。
 
-## Issue Types
+## Issue 类型
 
-| Type | Identifying Signals |
+| 类型 | 识别信号 |
 | --- | --- |
-| Bug Report | Describes unexpected behavior, crash, error, regression. Often has "bug" label or "[Bug]" prefix. |
-| Feature Request | Proposes new functionality or enhancement. Often has "enhancement" label or "[Feature]" prefix. |
-| Question | Asks how something works, seeks guidance. Often has "question" label. |
-| Discussion | Open-ended exploration of approaches, architecture, or direction. |
+| 缺陷报告 | 描述非预期行为、崩溃、错误或回归。常带 `bug` label 或 `[Bug]` 前缀。 |
+| 功能请求 | 提出新功能或增强。常带 `enhancement` label 或 `[Feature]` 前缀。 |
+| 问题咨询 | 询问工作原理或寻求使用指导。常带 `question` label。 |
+| 讨论 | 开放式讨论方案、架构或方向。 |
 
-## Bug Report Quality Criteria
+## 缺陷报告质量标准
 
-| Dimension | 5/5 | 3/5 | 1/5 |
+| 维度 | 5/5 | 3/5 | 1/5 |
 | --- | --- | --- | --- |
-| Problem statement | Specific behavior described with context | General description of what's wrong | "It's broken" with no detail |
-| Reproduction | Numbered steps, minimal reproduction | Partial steps or "sometimes happens" | No steps, "just use the app" |
-| Expected vs actual | Both clearly stated | One stated, other implied | Neither stated |
-| Environment | OS, version, device, relevant config | Partial info | Nothing |
-| Evidence | Logs, screenshots, error messages | Partial evidence | Nothing |
+| Problem statement | 带上下文地描述具体现象 | 大致说明哪里不对 | 只有“坏了”，没有细节 |
+| Reproduction | 有编号步骤和最小复现 | 部分步骤或“偶尔发生” | 没有步骤，只说“用一下就知道” |
+| Expected vs actual | 两者都清楚说明 | 只说明一个，另一个可推断 | 两者都没有 |
+| Environment | OS、版本、设备、相关配置齐全 | 信息不完整 | 没有环境信息 |
+| Evidence | 有日志、截图或错误信息 | 证据不完整 | 没有证据 |
 
-## Feature Request Quality Criteria
+## 功能请求质量标准
 
-| Dimension | 5/5 | 3/5 | 1/5 |
+| 维度 | 5/5 | 3/5 | 1/5 |
 | --- | --- | --- | --- |
-| Problem statement | Clear pain point with user scenario | General frustration described | No problem context |
-| Proposed solution | Concrete, specific, bounded | Vague direction | "Make it better" |
-| Alternatives | Multiple approaches compared | One alternative mentioned | None considered |
-| Scope | Clear boundaries, single feature | Somewhat bounded | Unbounded wish list |
-| Impact | Who benefits, how often, how much | General benefit claimed | No impact context |
+| Problem statement | 有明确痛点和用户场景 | 只描述一般性不满 | 没有问题背景 |
+| Proposed solution | 具体、明确、有边界 | 只有模糊方向 | “做得更好” |
+| Acceptance criteria | 可观察、可测试 | 有大致完成标准 | 没有完成标准 |
+| Scope | 边界清楚，单一功能 | 有一定边界 | 无边界愿望清单 |
+| Dependencies | 关键依赖或决策明确 | 有部分未知 | 依赖完全不清楚 |
 
-## Priority Signals
+## 优先级信号
 
-| Priority | Signals in Issue Text |
+| Priority | issue 文本中的信号 |
 | --- | --- |
-| P0-Critical | Data loss, security vulnerability, complete feature broken for all users, production down, no workaround |
-| P1-High | Major feature broken, significant UX degradation, affects many users, workaround exists but painful |
-| P2-Medium | Minor feature broken, cosmetic with functional impact, affects some users, easy workaround |
-| P3-Low | Enhancement, cosmetic-only, edge case, nice-to-have, affects few users |
+| P0-致命 | 数据丢失、安全漏洞、核心功能对所有用户完全不可用、生产故障、无 workaround |
+| P1-高 | 主要功能故障、显著 UX 退化、影响大量用户、有 workaround 但成本高 |
+| P2-中 | 次要功能故障、有功能影响的视觉问题、影响部分用户、workaround 容易 |
+| P3-低 | 增强、纯视觉、边缘情况、nice-to-have、影响少量用户 |
 
-## Scoring Rules
+## 评分规则
 
-- Start at 3/5 (baseline: intent is clear).
-- Add +1 for each dimension that is fully satisfied beyond baseline.
-- Subtract -1 for each critical gap that blocks actionability.
-- A brief but perfectly clear issue can score 5/5.
-- A verbose but unfocused issue can score 2/5.
-- Brevity is not a penalty; lack of actionable information is.
+- 从 3/5 开始（基线：意图清楚）。
+- 每个超出基线且完整满足的关键维度 +1。
+- 每个阻塞可执行性的关键缺口 -1。
+- 简短但完全清楚的 issue 可以是 5/5。
+- 冗长但不聚焦的 issue 可以是 2/5。
+- 简短本身不是扣分项；缺少可执行信息才是扣分项。
 
-## Comment Calibration
+## 评论校准
 
-- A 5/5 issue should not receive a list of artificial improvements. Say no required reporter action remains; add at most one optional polish item if it would help maintainers.
-- A 4/5 issue usually needs at most one optional polish item or one clarifying detail.
-- A 3/5 issue should get 2-3 targeted questions tied to actionability, not a full template checklist.
-- A 1-2/5 issue should be handled constructively: identify the first missing piece that would make the report understandable before asking for secondary details.
-- Priority and quality are separate. A low-quality report can describe a high-priority incident, and a high-quality report can describe a low-priority enhancement.
+- 5/5 的 issue 不应收到一串人为制造的改进建议。说明 `No required reporter action remains`；只有确实帮助维护者时，最多加一条可选润色建议。
+- 4/5 的 issue 通常最多需要一条可选润色建议或一个澄清细节。
+- 3/5 的 issue 应得到 2-3 个和可执行性直接相关的定向问题，而不是完整模板清单。
+- 1-2/5 的 issue 也要建设性处理：先指出能让报告可理解的第一个缺失信息，再请求次要细节。
+- 优先级和质量是两个独立判断。低质量报告可能描述高优先级事故，高质量报告也可能只是低优先级增强。
