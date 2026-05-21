@@ -20,6 +20,19 @@ triggers:
 
 自主仓库改进循环。读取状态文件，执行当前阶段，推进状态机，每次迭代完成一个改进。
 
+<HARD-GATE>
+在创建 GitHub Issue 并等待 repo-guard 评论之前，禁止修改任何项目代码文件。
+在 Issue 创建并评估 repo-guard 反馈之前，禁止创建分支、编写方案或执行实现。
+违反此规则等同于跳过测试直接提交——无论改进多么"显而易见"，都必须走完整流程。
+</HARD-GATE>
+
+## 红线
+
+- 不经过 Issue 直接修改代码 → 违规。立即停止，回退到 Phase 1。
+- 不等 repo-guard 评论就开始实现 → 违规。必须轮询等待或超时后才能继续。
+- 跳过 PR 直接 commit 到默认分支 → 违规。所有变更必须通过 PR。
+- "这个改动太小不需要走流程" → 不存在这种例外。所有改动走完整五阶段。
+
 ## 触发信号
 
 - "审视这个仓库并持续改进"
@@ -68,7 +81,18 @@ digraph repo_evolver {
 2. 读取 `.claude/repo-evolver.local.md`。如果不存在，创建初始状态（phase: scan, backlog: []）。
 3. 根据当前 phase 跳转到对应阶段。
 
+### 执行模型
+
+**每次调用只执行当前 phase，完成后更新状态文件并退出。** 不要在一次调用中连续执行多个 phase。
+
+- ralph-loop 模式：stop-hook 会重新喂入 prompt，下次调用自动进入下一个 phase。
+- 单次调用模式：执行完当前 phase 后停止，用户下次调用时继续。
+
+这意味着：Phase 1 结束后退出，Phase 2 在下次调用时执行，以此类推。这确保每个 phase 之间有明确的状态持久化点，且 repo-guard 有时间产生评论。
+
 ### Phase 1: SCAN
+
+**本阶段只读。禁止修改任何项目文件。产出是 backlog 列表，不是代码变更。**
 
 1. 读取 `references/scan-rubric.md`。
 2. 运行项目的 lint、typecheck、test 命令，收集 warnings 和 failures。
@@ -76,15 +100,17 @@ digraph repo_evolver {
 4. grep TODO/FIXME/HACK，检查过时依赖。
 5. 对每个发现按 scan-rubric 评分，写入 backlog（去重：不重复已有 issue 或已尝试过的改进）。
 6. 如果 backlog 为空且无新发现，输出 `<promise>NO_MORE_IMPROVEMENTS</promise>` 终止循环。
-7. 否则取最高优先级项，设置 phase=issue，更新状态文件。
+7. 否则取最高优先级项，设置 phase=issue，更新状态文件。**然后停止。不要继续执行 Phase 2。**
 
 ### Phase 2: ISSUE
+
+**本阶段禁止修改项目代码。唯一允许的写操作是创建 GitHub Issue 和更新状态文件。**
 
 1. 用 `gh issue create` 创建 issue，标题和正文描述改进点。
 2. 等待 repo-guard 的 issue review 评论（轮询 `gh api repos/{owner}/{repo}/issues/{number}/comments`，最多等待 3 分钟，间隔 30 秒）。
 3. 读取 `references/quality-evaluation.md`，对 repo-guard 评论评分。
 4. 如果 repo-guard 建议有价值（分数 >= 0），将其纳入后续方案的约束条件。
-5. 设置 phase=plan，记录 issue 编号，更新状态文件。
+5. 设置 phase=plan，记录 issue 编号，更新状态文件。**然后停止。不要继续执行 Phase 3。**
 
 ### Phase 3: PLAN + IMPLEMENT
 
