@@ -16,11 +16,10 @@ YAML frontmatter + Markdown body。
 
 ```yaml
 ---
-phase: scan          # scan | issue | plan | pr_review | meta_improve
+phase: scan | dispatch | collect | meta_improve
 iteration: 1         # 当前迭代次数（ralph-loop 每次 +1）
-current_issue: null   # 当前处理的 issue 编号，null 表示无
-current_pr: null      # 当前处理的 PR 编号，null 表示无
-current_branch: null  # 当前工作分支名，null 表示无
+active_issues: []    # 当前批次的 issue 编号列表
+active_prs: []       # 当前批次的 PR 编号列表
 meta_improvement_count: 0          # 累计 meta-improvement 次数
 last_meta_iteration: 0             # 上次 meta-improvement 的迭代号
 meta_improvement_exhausted: false  # 是否已放弃 meta-improvement
@@ -38,6 +37,14 @@ consecutive_empty_scans: 0         # 连续空 backlog 扫描次数
 - [x] [P0/10] Fix failing test in executor.test.ts (done: PR #18)
 - [~] [P2/4] Reduce complexity of planner.ts:generatePlan (skipped: 连续失败 2 次)
 
+## Active Batch
+
+| Issue | PR | Branch | Status | Agent |
+|-------|-----|--------|--------|-------|
+| #42 | #50 | improve/remove-legacy-helper | pr_created | agent-1 |
+| #43 | #51 | improve/fix-type-error | ci_passing | agent-2 |
+| #44 | - | improve/add-tests | implementing | agent-3 |
+
 ## Quality Log
 
 | PR | Score | Details |
@@ -46,13 +53,6 @@ consecutive_empty_scans: 0         # 连续空 backlog 扫描次数
 | #19 | 2.1 | 1 正确(+2), 2 误报(-2), 1 遗漏(-2), raw=-0.5, norm=1.9 |
 
 **Rolling Average:** 3.15
-
-## Current Work
-
-Phase: plan
-Working on: Remove unused export `legacyHelper` from shared/utils.ts
-Issue: #42
-Branch: improve/remove-legacy-helper
 
 ## Meta-Improvement Log
 
