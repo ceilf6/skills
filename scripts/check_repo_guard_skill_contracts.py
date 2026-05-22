@@ -22,12 +22,15 @@ REQUIRED_TEXT = {
         "不要添加输出契约之外的额外标题",
         "行级发现的 bullet 必须以 `- [` 开头",
         "所有标题和加粗字段名必须与输出契约完全一致",
+        "关联 issue 是产品意图和验收标准的主要证据",
+        "对照关联 issue 的 problem statement、acceptance criteria 和约束",
         "不要在任何评审平台发布、修改或关闭内容",
     ],
     "code-reviewer/references/review-rubric.md": [
         "## GitHub 评论质量",
         "### 行级评论卫生",
         "### 无发现评审",
+        "PR 是否满足关联 issue 的验收标准",
     ],
     "issue-reviewer/SKILL.md": [
         "你是 issue 分析机器人",

@@ -14,6 +14,7 @@
 ## 级联优先检查
 
 - 识别被修改的符号、公共接口、route/tool 契约、schema、配置键和共享 helper。
+- 检查 PR 是否满足关联 issue 的验收标准、问题陈述和显式约束。
 - 优先检查 d=1 上游直接调用方。若变更集外的调用方仍期待旧行为，这是 blocking finding。
 - 当被修改符号处于核心路径、复用范围广或关键工作流中时，继续检查 d=2/d=3 流程。
 - 检查测试是否覆盖受影响流程，而不只是覆盖被编辑文件。
@@ -22,6 +23,7 @@
 ## Karpathy 评审标准
 
 - **Assumptions surfaced:** 标出不清晰的产品意图、模糊的兼容承诺或隐藏迁移假设。
+- **Issue context checked:** 关联 issue 给出验收标准时，标出 PR 漏实现、只实现一半或测试未覆盖验收项的情况。
 - **Simplicity first:** 标出猜测性抽象、过度配置、不必要的通用 helper，以及小问题上的大型方案。
 - **Surgical changes:** 标出无关重构、格式噪声、顺手清理，或无法追溯到既定目标的变更行。
 - **Goal-driven verification:** 标出缺少无效输入、变更契约、受影响调用方、回归路径或用户可见行为测试的问题。
@@ -41,6 +43,7 @@
 每个发现都需要具体证据：
 
 - 可用时给出文件和行号
+- 关联 issue 编号、problem statement 或 acceptance criteria
 - diff hunk 或符号名
 - 受影响调用方、流程、契约或测试缺口
 - 为什么合并后会有影响
