@@ -1,12 +1,19 @@
 #!/usr/bin/env node
 
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const DEFAULT_PAGE_SIZE = 50;
+const DEFAULT_API_PAGE_SIZE = 2000;
+const FRIDAY_BASE_URLS = {
+  dev: "https://mcphub.inf.dev.sankuai.com",
+  prod: "https://friday.sankuai.com",
+  test: "https://friday.ai.test.sankuai.com",
+};
 
 function asString(value) {
   if (value === undefined || value === null) return "";
@@ -55,6 +62,8 @@ function firstArray(...values) {
 }
 
 export function parseDaxiangMembers(raw) {
+  if (Array.isArray(raw)) return normalizeMembers(raw);
+
   const members = firstArray(
     raw?.data?.data?.memberList,
     raw?.data?.memberList,
@@ -70,15 +79,46 @@ export function parseDaxiangMembers(raw) {
 
 export function normalizeMembers(members) {
   return members
-    .map((member) => ({
-      empId: asString(member.empId ?? member.employeeId ?? member.id),
-      joinTime: member.joinTime ?? member.join_time ?? null,
-      mis: asString(member.mis ?? member.login ?? member.username),
-      name: asString(member.name ?? member.userName ?? member.displayName),
-      role: roleName(member.role),
-      uid: asString(member.uid ?? member.userId),
-    }))
+    .map((member) => {
+      if (typeof member === "string") {
+        return {
+          empId: "",
+          joinTime: null,
+          mis: asString(member),
+          name: "",
+          role: "member",
+          uid: "",
+        };
+      }
+
+      return {
+        empId: asString(member.empId ?? member.employeeId ?? member.id),
+        joinTime: member.joinTime ?? member.join_time ?? null,
+        mis: asString(member.mis ?? member.login ?? member.username),
+        name: asString(member.name ?? member.userName ?? member.displayName),
+        role: roleName(member.role),
+        uid: asString(member.uid ?? member.userId),
+      };
+    })
     .filter((member) => member.mis || member.empId || member.uid || member.name);
+}
+
+export function parseMisList(value) {
+  const raw = asString(value);
+  if (!raw) return [];
+
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) throw new Error("--mis-list JSON must be an array");
+    return parsed.map(asString).filter(Boolean);
+  } catch (error) {
+    if (raw.startsWith("[") || raw.startsWith("{")) throw error;
+  }
+
+  return raw
+    .split(/[,\n]/)
+    .map(asString)
+    .filter(Boolean);
 }
 
 export function normalizeSkillItems(items) {
@@ -207,6 +247,7 @@ function parseArgs(argv) {
   const options = {
     env: "prod",
     format: "md",
+    apiPageSize: DEFAULT_API_PAGE_SIZE,
     pageSize: DEFAULT_PAGE_SIZE,
     refresh: false,
   };
@@ -222,12 +263,16 @@ function parseArgs(argv) {
     if (arg === "--gid") options.gid = readValue();
     else if (arg === "--format") options.format = readValue();
     else if (arg === "--env") options.env = readValue();
+    else if (arg === "--api-page-size") options.apiPageSize = Number(readValue());
     else if (arg === "--page-size") options.pageSize = Number(readValue());
     else if (arg === "--max-pages") options.maxPages = Number(readValue());
     else if (arg === "--cache-file") options.cacheFile = readValue();
     else if (arg === "--members-file") options.membersFile = readValue();
+    else if (arg === "--mis-file") options.misFile = readValue();
+    else if (arg === "--mis-list") options.misList = readValue();
     else if (arg === "--skills-file") options.skillsFile = readValue();
     else if (arg === "--ciba") options.ciba = readValue();
+    else if (arg === "--token") options.token = readValue();
     else if (arg === "--operator-mis") options.operatorMis = readValue();
     else if (arg === "--force-ciba") options.forceCiba = true;
     else if (arg === "--refresh") options.refresh = true;
@@ -237,6 +282,13 @@ function parseArgs(argv) {
 
   if (!Number.isFinite(options.pageSize) || options.pageSize < 1 || options.pageSize > 50) {
     throw new Error("--page-size must be a number from 1 to 50");
+  }
+  if (
+    !Number.isFinite(options.apiPageSize) ||
+    options.apiPageSize < 1 ||
+    options.apiPageSize > 5000
+  ) {
+    throw new Error("--api-page-size must be a number from 1 to 5000");
   }
   if (options.maxPages !== undefined && (!Number.isFinite(options.maxPages) || options.maxPages < 1)) {
     throw new Error("--max-pages must be a positive number");
@@ -251,19 +303,23 @@ function parseArgs(argv) {
 
 function usage() {
   return [
-    "Usage: node scripts/group_skill_stats.mjs --gid <daxiangGroupId> [options]",
+    "Usage: node scripts/group_skill_stats.mjs (--gid <daxiangGroupId> | --mis-list <json|csv> | --mis-file <path>) [options]",
     "",
     "Options:",
     "  --format md|json|csv        Output format. Default: md",
     "  --env dev|test|prod         Friday environment. Default: prod",
+    "  --api-page-size <1-5000>    Direct Friday API page size. Default: 2000",
     "  --page-size <1-50>          mtskills page size. Default: 50",
     "  --max-pages <n>             Limit Friday pages for dry runs",
     "  --cache-file <path>         Cache Friday skill list JSON",
     "  --refresh                   Ignore and rewrite cache",
     "  --members-file <path>       Use saved oa-skills JSON instead of calling Daxiang",
+    "  --mis-file <path>           Use a saved JSON array of MIS values",
+    "  --mis-list <json|csv>       Use a JSON array or comma-separated MIS values",
     "  --skills-file <path>        Use saved mtskills JSON/list instead of scanning Friday",
     "  --operator-mis <mis>        Pass MIS to oa-skills as the acting user",
     "  --ciba <mis>                Use CIBA for mtskills and force CIBA for oa-skills",
+    "  --token <access-token>      Use an explicit Friday access token",
     "  --force-ciba               Force oa-skills CIBA when using --operator-mis",
   ].join("\n");
 }
@@ -292,12 +348,70 @@ function defaultCacheFile(env) {
   return join(tmpdir(), "group-skill-stats", `friday-skills-${env}.json`);
 }
 
+function ssoEnvForFridayEnv(env) {
+  return env === "prod" ? "product" : "test";
+}
+
+function cibaEnvForFridayEnv(env) {
+  return env === "prod" ? "prod" : "test";
+}
+
+function mtskillsTokenDir() {
+  return process.env.MTSKILLS_SSO_TOKEN_DIR || join(homedir(), ".mtskills_sso_config");
+}
+
+function defaultMtskillsTokenFile(env) {
+  const clientId = env === "prod" ? "0968168675" : "e39169b175";
+  const hash = createHash("sha1").update(`${clientId}_@_cli`).digest("hex");
+  return join(mtskillsTokenDir(), ssoEnvForFridayEnv(env), `${hash}_tokens.json`);
+}
+
+function cibaTokenFile(mis, env) {
+  return join(mtskillsTokenDir(), "ciba", cibaEnvForFridayEnv(env), `${mis}_tokens.json`);
+}
+
+function readAccessTokenFromFile(filePath) {
+  if (!existsSync(filePath)) return "";
+  const token = JSON.parse(readFileSync(filePath, "utf8"));
+  return asString(token.access_token);
+}
+
+function readFridayAccessToken(options) {
+  if (options.token) return options.token;
+  if (options.ciba) return readAccessTokenFromFile(cibaTokenFile(options.ciba, options.env));
+  return readAccessTokenFromFile(defaultMtskillsTokenFile(options.env));
+}
+
+function ensureCibaToken(options) {
+  if (!options.ciba || readFridayAccessToken(options)) return;
+  runCommand("mtskills", [
+    "search",
+    "--json",
+    "--env",
+    options.env,
+    "--page-size",
+    "1",
+    "--page",
+    "1",
+    "--ciba",
+    options.ciba,
+  ]);
+}
+
 function loadMembers(options) {
+  if (options.misList) {
+    return normalizeMembers(parseMisList(options.misList));
+  }
+  if (options.misFile) {
+    const raw = readJsonFile(options.misFile);
+    if (!Array.isArray(raw)) throw new Error("--mis-file must contain a JSON array");
+    return normalizeMembers(raw);
+  }
   if (options.membersFile) {
     return parseDaxiangMembers(readJsonFile(options.membersFile));
   }
   if (!options.gid) {
-    throw new Error("--gid is required unless --members-file is provided");
+    throw new Error("--gid is required unless --members-file, --mis-file, or --mis-list is provided");
   }
 
   const args = ["daxiang", "group", "list-members", "--user", "--gid", options.gid, "--raw"];
@@ -311,7 +425,51 @@ function loadMembers(options) {
   return parseDaxiangMembers(parseJsonFromText(runCommand("oa-skills", args)));
 }
 
-function fetchFridaySkills(options) {
+async function fetchFridaySkillsViaApi(options) {
+  ensureCibaToken(options);
+  const accessToken = readFridayAccessToken(options);
+  if (!accessToken) {
+    throw new Error("No cached Friday access token found. Retry with --ciba <mis> or --token <access-token>.");
+  }
+
+  const baseUrl = FRIDAY_BASE_URLS[options.env];
+  if (!baseUrl) throw new Error(`unsupported Friday environment: ${options.env}`);
+
+  const allItems = [];
+  let page = 1;
+  let totalPages = 1;
+
+  while (page <= totalPages) {
+    const url = new URL(`${baseUrl}/mcphub-api/skill/list`);
+    url.searchParams.set("page", String(page));
+    url.searchParams.set("pageSize", String(options.apiPageSize));
+
+    const response = await fetch(url, {
+      headers: {
+        "Content-Type": "application/json",
+        "X-MTSKILLS-SSO-Env": ssoEnvForFridayEnv(options.env),
+        "access-token": accessToken,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`Friday API failed: HTTP ${response.status}`);
+    }
+
+    const pageResult = await response.json();
+    const items = extractSkillItems(pageResult);
+    allItems.push(...items);
+
+    const total = Number(pageResult?.result?.total ?? pageResult?.total ?? allItems.length);
+    totalPages = Math.max(1, Math.ceil(total / options.apiPageSize));
+
+    if (options.maxPages && page >= options.maxPages) break;
+    page += 1;
+  }
+
+  return allItems;
+}
+
+function fetchFridaySkillsViaCli(options) {
   const allItems = [];
   let page = 1;
   let totalPages = 1;
@@ -340,7 +498,16 @@ function fetchFridaySkills(options) {
   return allItems;
 }
 
-function loadSkills(options) {
+async function fetchFridaySkills(options) {
+  try {
+    return await fetchFridaySkillsViaApi(options);
+  } catch (error) {
+    if (options.maxPages) throw error;
+    return fetchFridaySkillsViaCli(options);
+  }
+}
+
+async function loadSkills(options) {
   if (options.skillsFile) {
     return extractSkillItems(readJsonFile(options.skillsFile));
   }
@@ -350,7 +517,7 @@ function loadSkills(options) {
     return extractSkillItems(readJsonFile(cacheFile));
   }
 
-  const skills = fetchFridaySkills(options);
+  const skills = await fetchFridaySkills(options);
   mkdirSync(dirname(cacheFile), { recursive: true });
   writeFileSync(cacheFile, JSON.stringify(skills, null, 2));
   return skills;
@@ -386,7 +553,7 @@ async function main() {
   }
 
   const members = loadMembers(options);
-  const skills = loadSkills(options);
+  const skills = await loadSkills(options);
   const result = aggregateSkillCounts(members, skills);
   console.log(formatResult(result, options));
 }

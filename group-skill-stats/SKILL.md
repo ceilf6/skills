@@ -7,11 +7,11 @@ description: Use when counting or ranking Friday/SkillHub skills created by memb
 
 ## Overview
 
-Count Friday/SkillHub skills created by members of a Daxiang group and return a Markdown table. Use the bundled script so member parsing, Friday pagination, creator matching, and report formatting stay consistent.
+Count Friday/SkillHub skills created by members of a Daxiang group or an explicit MIS list, then return a Markdown table. Use the bundled script so member parsing, Friday pagination, creator matching, and report formatting stay consistent.
 
 ## Workflow
 
-1. Resolve the Daxiang group ID. If the user only provides a group name or an unsigned Neixin URL and the group ID is not discoverable from context, ask for the group ID.
+1. Resolve the input source. Prefer an explicit MIS list when the user provides one. Otherwise resolve the Daxiang group ID; if the user only provides a group name or an unsigned Neixin URL and the group ID is not discoverable from context, ask for the group ID.
 2. Ensure required CLIs exist:
 
 ```bash
@@ -28,6 +28,12 @@ npm install -g @it/oa-skills @mtfe/mtskills --registry=http://r.npm.sankuai.com
 
 ```bash
 node group-skill-stats/scripts/group_skill_stats.mjs --gid <groupId> --format md
+```
+
+For a direct MIS list:
+
+```bash
+node group-skill-stats/scripts/group_skill_stats.mjs --mis-list '["mis1","mis2"]' --format md
 ```
 
 4. If Friday authentication fails, retry with CIBA using the user's known MIS, or ask for MIS if unknown:
@@ -63,6 +69,8 @@ Useful options:
 | `--refresh` | Ignore cached Friday skill list and rescan |
 | `--cache-file <path>` | Choose a cache file for Friday scan results |
 | `--members-file <path>` | Test with saved `oa-skills ... --raw` JSON |
+| `--mis-list <json\|csv>` | Use a JSON array or comma-separated MIS list directly |
+| `--mis-file <path>` | Use a JSON file containing an array of MIS values |
 | `--skills-file <path>` | Test with saved `mtskills search --json` data |
 
 ## Data Sources

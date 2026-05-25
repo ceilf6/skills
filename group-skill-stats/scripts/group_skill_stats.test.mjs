@@ -9,6 +9,7 @@ import {
   normalizeMembers,
   normalizeSkillItems,
   parseDaxiangMembers,
+  parseMisList,
 } from "./group_skill_stats.mjs";
 
 test("parseDaxiangMembers extracts nested oa-skills memberList", () => {
@@ -38,6 +39,28 @@ test("parseDaxiangMembers extracts nested oa-skills memberList", () => {
       name: "赵道军",
       role: "owner",
       uid: "1754653",
+    },
+  ]);
+});
+
+test("parseDaxiangMembers and parseMisList support direct MIS arrays", () => {
+  assert.deepEqual(parseMisList('["wangjinghong02","liyuqian06"]'), [
+    "wangjinghong02",
+    "liyuqian06",
+  ]);
+  assert.deepEqual(parseMisList("wangjinghong02, liyuqian06\nshuyue03"), [
+    "wangjinghong02",
+    "liyuqian06",
+    "shuyue03",
+  ]);
+  assert.deepEqual(parseDaxiangMembers(["wangjinghong02"]), [
+    {
+      empId: "",
+      joinTime: null,
+      mis: "wangjinghong02",
+      name: "",
+      role: "member",
+      uid: "",
     },
   ]);
 });
