@@ -7,11 +7,11 @@ description: Use when counting or ranking Friday/SkillHub skills created by memb
 
 ## Overview
 
-Count Friday/SkillHub skills created by members of a Daxiang group or an explicit MIS list, then return a Markdown table. Use the bundled script so member parsing, Friday pagination, creator matching, and report formatting stay consistent.
+Count Friday/SkillHub skills created by members of the embedded team MIS list, a Daxiang group, or an explicit MIS list. Use the bundled script so member parsing, Friday pagination, creator matching, and report formatting stay consistent.
 
 ## Workflow
 
-1. Resolve the input source. Prefer an explicit MIS list when the user provides one. Otherwise resolve the Daxiang group ID; if the user only provides a group name or an unsigned Neixin URL and the group ID is not discoverable from context, ask for the group ID.
+1. Resolve the input source. If the user asks for this team's total without providing input, use the script with no member source; it has the team MIS list embedded. Prefer an explicit MIS list when the user provides one. Otherwise resolve the Daxiang group ID; if the user only provides a group name or an unsigned Neixin URL and the group ID is not discoverable from context, ask for the group ID.
 2. Ensure required CLIs exist:
 
 ```bash
@@ -24,10 +24,10 @@ If missing, install the relevant CLI:
 npm install -g @it/oa-skills @mtfe/mtskills --registry=http://r.npm.sankuai.com
 ```
 
-3. Run the report. Default output is a Markdown table:
+3. Run the report. With no member source, the script uses the embedded team MIS list:
 
 ```bash
-node group-skill-stats/scripts/group_skill_stats.mjs --gid <groupId> --format md
+node group-skill-stats/scripts/group_skill_stats.mjs --format md
 ```
 
 For a direct MIS list:
@@ -76,6 +76,6 @@ Useful options:
 ## Data Sources
 
 - Daxiang members: `oa-skills daxiang group list-members --user --gid <gid> --raw`
-- Friday skills: `mtskills search --json --page-size 50 --page <n>`
+- Friday skills: direct `https://friday.sankuai.com/mcphub-api/skill/list` pagination using the local mtskills token cache, with `mtskills search` as a fallback.
 
 Prefer `oa-skills daxiang` over calling `https://api.neixin.cn/ems-group/...` directly because the CLI handles user SSO/CIBA and signed request details.

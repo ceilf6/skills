@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   aggregateSkillCounts,
+  DEFAULT_TEAM_MIS_LIST,
   formatCsv,
   formatResult,
   formatTable,
@@ -63,6 +64,13 @@ test("parseDaxiangMembers and parseMisList support direct MIS arrays", () => {
       uid: "",
     },
   ]);
+});
+
+test("default team MIS list is embedded for no-input skill calls", () => {
+  assert.equal(DEFAULT_TEAM_MIS_LIST.length, 46);
+  assert.equal(DEFAULT_TEAM_MIS_LIST.includes("liyuqian06"), true);
+  assert.equal(DEFAULT_TEAM_MIS_LIST.includes("wangjinghong02"), true);
+  assert.equal(new Set(DEFAULT_TEAM_MIS_LIST).size, DEFAULT_TEAM_MIS_LIST.length);
 });
 
 test("aggregateSkillCounts counts skills for exact member MIS and reports unmatched creators", () => {

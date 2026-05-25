@@ -14,6 +14,54 @@ const FRIDAY_BASE_URLS = {
   prod: "https://friday.sankuai.com",
   test: "https://friday.ai.test.sankuai.com",
 };
+export const DEFAULT_TEAM_MIS_LIST = Object.freeze([
+  "bei.guo",
+  "zhangxiangyu23",
+  "liuhaohao",
+  "majiaxin04",
+  "quekaixin",
+  "yuanlu09",
+  "xiaoruoyin",
+  "wb_huwenqiang02",
+  "zhaobingqian02",
+  "wangjinghong02",
+  "wb_zhuyeheng",
+  "wb_sunchao07",
+  "liyuqian06",
+  "lizeming02",
+  "wb_dingting",
+  "xiaojie.chen",
+  "wb_chenyongqi05",
+  "xuanruiwei",
+  "panyuanyuan05",
+  "xiejiatong02",
+  "zhangjun150",
+  "suquan",
+  "wb_gaotian03",
+  "wb_yudalin",
+  "zhangbowen23",
+  "wb_chenwenwei",
+  "shuyue03",
+  "liuyu225",
+  "fanchuyun",
+  "guchengwei",
+  "lijiawei16",
+  "liuhaibo03",
+  "jiangpeng25",
+  "wudongxia",
+  "linju",
+  "zengyunchi",
+  "yaoli04",
+  "wb_caizhiquan",
+  "jiangzhiwei09",
+  "guyixin",
+  "zhengyuling06",
+  "yayun.deng",
+  "wangyutong18",
+  "lihuiliang",
+  "wb_chenyile02",
+  "wb_chengfeixiang",
+]);
 
 function asString(value) {
   if (value === undefined || value === null) return "";
@@ -303,7 +351,7 @@ function parseArgs(argv) {
 
 function usage() {
   return [
-    "Usage: node scripts/group_skill_stats.mjs (--gid <daxiangGroupId> | --mis-list <json|csv> | --mis-file <path>) [options]",
+    "Usage: node scripts/group_skill_stats.mjs [--gid <daxiangGroupId> | --mis-list <json|csv> | --mis-file <path>] [options]",
     "",
     "Options:",
     "  --format md|json|csv        Output format. Default: md",
@@ -411,7 +459,7 @@ function loadMembers(options) {
     return parseDaxiangMembers(readJsonFile(options.membersFile));
   }
   if (!options.gid) {
-    throw new Error("--gid is required unless --members-file, --mis-file, or --mis-list is provided");
+    return normalizeMembers(DEFAULT_TEAM_MIS_LIST);
   }
 
   const args = ["daxiang", "group", "list-members", "--user", "--gid", options.gid, "--raw"];
