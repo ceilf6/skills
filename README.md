@@ -88,3 +88,9 @@ repo-guard 通过 git submodule 引用本仓库，运行时始终拉取最新版
 核心是一个五阶段状态机：扫描仓库发现改进点 → 创建 GitHub Issue → 编写技术方案并实现 → 提交 PR → 检查 repo-guard 审评并处理反馈，完成后自动回到扫描阶段继续下一轮。通过 Ralph Loop 的 stop-hook 机制实现跨迭代持久化，每次迭代只做一个改进，状态文件记录进度。
 
 独特能力是 meta-improvement：当 repo-guard 的审评质量持续偏低（滚动窗口平均分 < 3）时，自动切换到 repo-guard 仓库改进其 prompts 和 skills，形成评审质量的自我进化闭环。内置频率限制和硬上限防止无限元循环。
+
+---
+
+# progress-reporter
+
+用于在**飞书**定时 cron 群公告项目进度的技能
