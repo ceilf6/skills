@@ -36,6 +36,12 @@ For a direct MIS list:
 node group-skill-stats/scripts/group_skill_stats.mjs --mis-list '["mis1","mis2"]' --format md
 ```
 
+For a creation-time range, add one or both bounds. `YYYY-MM-DD` dates are inclusive; `--created-to 2026-05-25` includes the whole day.
+
+```bash
+node group-skill-stats/scripts/group_skill_stats.mjs --created-from 2026-05-01 --created-to 2026-05-25 --format md
+```
+
 4. If Friday authentication fails, retry with CIBA using the user's known MIS, or ask for MIS if unknown:
 
 ```bash
@@ -72,6 +78,8 @@ Useful options:
 | `--mis-list <json\|csv>` | Use a JSON array or comma-separated MIS list directly |
 | `--mis-file <path>` | Use a JSON file containing an array of MIS values |
 | `--skills-file <path>` | Test with saved `mtskills search --json` data |
+| `--created-from <date>` | Include only skills created on or after this date/time |
+| `--created-to <date>` | Include only skills created on or before this date/time; date-only values include the whole day |
 
 ## Data Sources
 

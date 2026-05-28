@@ -125,6 +125,7 @@ export function parseMisList(value) {
 export function normalizeSkillItems(items) {
   return items
     .map((item) => ({
+      createdAt: asString(item.createdAt ?? item.createTime ?? item.create_time),
       creator: asString(item.creator ?? item.author ?? item.owner),
       id: asString(item.id),
       name: asString(item.name ?? item.alias),
@@ -244,6 +245,73 @@ export function formatCsv(rows) {
   return lines.join("\n");
 }
 
+function hasCreatedDateFilter(options = {}) {
+  return Boolean(options.createdFrom || options.createdTo);
+}
+
+function parseLocalDateOnly(raw, endOfDay) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
+  if (!match) return null;
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const date = endOfDay
+    ? new Date(year, month - 1, day, 23, 59, 59, 999)
+    : new Date(year, month - 1, day, 0, 0, 0, 0);
+
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+    throw new Error(`invalid date: ${raw}`);
+  }
+
+  return date.getTime();
+}
+
+export function parseDateTime(value, { endOfDay = false } = {}) {
+  const raw = asString(value);
+  if (!raw) return null;
+
+  if (/^\d+$/.test(raw)) {
+    const numeric = Number(raw);
+    if (!Number.isSafeInteger(numeric)) throw new Error(`invalid timestamp: ${raw}`);
+    return numeric < 100000000000 ? numeric * 1000 : numeric;
+  }
+
+  const localDateOnly = parseLocalDateOnly(raw, endOfDay);
+  if (localDateOnly !== null) return localDateOnly;
+
+  const parsed = Date.parse(raw);
+  if (Number.isNaN(parsed)) throw new Error(`invalid date/time: ${raw}`);
+  return parsed;
+}
+
+export function filterSkillsByCreatedAt(skills, options = {}) {
+  if (!hasCreatedDateFilter(options)) return skills;
+
+  const from = parseDateTime(options.createdFrom);
+  const to = parseDateTime(options.createdTo, { endOfDay: true });
+  if (from !== null && to !== null && from > to) {
+    throw new Error("--created-from must be earlier than or equal to --created-to");
+  }
+
+  let sawCreatedAt = false;
+  const filtered = skills.filter((skill) => {
+    const createdAt = parseDateTime(skill.createdAt);
+    if (createdAt === null) return false;
+
+    sawCreatedAt = true;
+    if (from !== null && createdAt < from) return false;
+    if (to !== null && createdAt > to) return false;
+    return true;
+  });
+
+  if (!sawCreatedAt && skills.length > 0) {
+    throw new Error("Loaded Friday skill data does not include creation time. Retry with --refresh.");
+  }
+
+  return filtered;
+}
+
 function parseArgs(argv) {
   const options = {
     env: "prod",
@@ -272,6 +340,8 @@ function parseArgs(argv) {
     else if (arg === "--mis-file") options.misFile = readValue();
     else if (arg === "--mis-list") options.misList = readValue();
     else if (arg === "--skills-file") options.skillsFile = readValue();
+    else if (arg === "--created-from") options.createdFrom = readValue();
+    else if (arg === "--created-to") options.createdTo = readValue();
     else if (arg === "--ciba") options.ciba = readValue();
     else if (arg === "--token") options.token = readValue();
     else if (arg === "--operator-mis") options.operatorMis = readValue();
@@ -298,6 +368,13 @@ function parseArgs(argv) {
   if (!["md", "json", "csv"].includes(options.format)) {
     throw new Error("--format must be one of: md, json, csv");
   }
+  if (hasCreatedDateFilter(options)) {
+    const from = parseDateTime(options.createdFrom);
+    const to = parseDateTime(options.createdTo, { endOfDay: true });
+    if (from !== null && to !== null && from > to) {
+      throw new Error("--created-from must be earlier than or equal to --created-to");
+    }
+  }
 
   return options;
 }
@@ -318,6 +395,8 @@ function usage() {
     "  --mis-file <path>           Use a saved JSON array of MIS values",
     "  --mis-list <json|csv>       Use a JSON array or comma-separated MIS values",
     "  --skills-file <path>        Use saved mtskills JSON/list instead of scanning Friday",
+    "  --created-from <date>       Include skills created on or after this date/time",
+    "  --created-to <date>         Include skills created on or before this date/time",
     "  --operator-mis <mis>        Pass MIS to oa-skills as the acting user",
     "  --ciba <mis>                Use CIBA for mtskills and force CIBA for oa-skills",
     "  --token <access-token>      Use an explicit Friday access token",
@@ -515,7 +594,10 @@ async function loadSkills(options) {
 
   const cacheFile = resolve(options.cacheFile || defaultCacheFile(options.env));
   if (!options.refresh && existsSync(cacheFile)) {
-    return extractSkillItems(readJsonFile(cacheFile));
+    const cachedSkills = extractSkillItems(readJsonFile(cacheFile));
+    if (!hasCreatedDateFilter(options) || cachedSkills.some((skill) => skill.createdAt)) {
+      return cachedSkills;
+    }
   }
 
   const skills = await fetchFridaySkills(options);
@@ -526,6 +608,8 @@ async function loadSkills(options) {
 
 export function formatResult(result, options) {
   const payload = {
+    createdFrom: options.createdFrom || null,
+    createdTo: options.createdTo || null,
     generatedAt: new Date().toISOString(),
     gid: options.gid || null,
     matchedSkillCount: result.matchedSkillCount,
@@ -540,10 +624,10 @@ export function formatResult(result, options) {
   return formatTable(result.rows);
 }
 
-export function runWithData(membersRaw, skillsRaw) {
+export function runWithData(membersRaw, skillsRaw, options = {}) {
   const members = Array.isArray(membersRaw) ? normalizeMembers(membersRaw) : parseDaxiangMembers(membersRaw);
   const skills = Array.isArray(skillsRaw) ? normalizeSkillItems(skillsRaw) : extractSkillItems(skillsRaw);
-  return aggregateSkillCounts(members, skills);
+  return aggregateSkillCounts(members, filterSkillsByCreatedAt(skills, options));
 }
 
 async function main() {
@@ -555,7 +639,7 @@ async function main() {
 
   const members = loadMembers(options);
   const skills = await loadSkills(options);
-  const result = aggregateSkillCounts(members, skills);
+  const result = aggregateSkillCounts(members, filterSkillsByCreatedAt(skills, options));
   console.log(formatResult(result, options));
 }
 
