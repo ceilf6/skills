@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 
 const DEFAULT_PAGE_SIZE = 50;
 const DEFAULT_API_PAGE_SIZE = 2000;
+const DEFAULT_CLI_API_PAGE_SIZE = 12;
 const FRIDAY_BASE_URLS = {
   dev: "https://mcphub.inf.dev.sankuai.com",
   prod: "https://friday.sankuai.com",
@@ -135,6 +136,26 @@ export function normalizeSkillItems(items) {
     .filter((item) => item.id || item.name || item.creator);
 }
 
+export function normalizeCliItems(items) {
+  return items
+    .map((item) => ({
+      createdAt: asString(item.createdAt ?? item.createTime ?? item.create_time),
+      creator: asString(item.creator ?? item.author ?? item.owner),
+      description: asString(item.description ?? item.alias),
+      id: asString(item.id),
+      name: asString(item.name),
+      updatedAt: asString(item.updatedAt ?? item.updateTime),
+    }))
+    .filter((item) => item.id || item.name || item.creator);
+}
+
+export function extractCliItems(raw) {
+  if (Array.isArray(raw)) return normalizeCliItems(raw);
+  return normalizeCliItems(
+    firstArray(raw?.items, raw?.data?.items, raw?.data?.data?.items, raw?.result?.items, raw?.result?.list),
+  );
+}
+
 export function extractSkillItems(raw) {
   if (Array.isArray(raw)) return normalizeSkillItems(raw);
   return normalizeSkillItems(
@@ -197,12 +218,92 @@ export function aggregateSkillCounts(members, skills) {
   };
 }
 
+export function aggregateAllCounts(members, skills, clis) {
+  const memberKeys = new Set();
+  for (const member of members) {
+    const key = normalizeKey(member.mis);
+    if (key) memberKeys.add(key);
+  }
+
+  const skillsByCreator = new Map();
+  const clisByCreator = new Map();
+  const unmatchedByCreator = new Map();
+
+  for (const skill of skills) {
+    const creatorKey = normalizeKey(skill.creator);
+    if (!creatorKey) continue;
+    if (memberKeys.has(creatorKey)) {
+      const bucket = skillsByCreator.get(creatorKey) || [];
+      bucket.push(skill);
+      skillsByCreator.set(creatorKey, bucket);
+    } else {
+      unmatchedByCreator.set(creatorKey, (unmatchedByCreator.get(creatorKey) || 0) + 1);
+    }
+  }
+
+  for (const cli of clis) {
+    const creatorKey = normalizeKey(cli.creator);
+    if (!creatorKey) continue;
+    if (memberKeys.has(creatorKey)) {
+      const bucket = clisByCreator.get(creatorKey) || [];
+      bucket.push(cli);
+      clisByCreator.set(creatorKey, bucket);
+    } else {
+      unmatchedByCreator.set(creatorKey, (unmatchedByCreator.get(creatorKey) || 0) + 1);
+    }
+  }
+
+  const rows = members.map((member) => {
+    const memberSkills = skillsByCreator.get(normalizeKey(member.mis)) || [];
+    const memberClis = clisByCreator.get(normalizeKey(member.mis)) || [];
+    const skillNames = memberSkills
+      .map((s) => s.name || s.id)
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b));
+    const cliNames = memberClis
+      .map((c) => c.name || c.id)
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b));
+
+    return {
+      empId: member.empId,
+      mis: member.mis,
+      name: member.name,
+      role: member.role || "member",
+      skillCount: memberSkills.length,
+      skillNames,
+      skills: memberSkills,
+      cliCount: memberClis.length,
+      cliNames,
+      clis: memberClis,
+      uid: member.uid,
+    };
+  });
+
+  const unmatchedCreators = Array.from(unmatchedByCreator.entries())
+    .map(([creator, count]) => ({ creator, count }))
+    .sort((a, b) => b.count - a.count || a.creator.localeCompare(b.creator));
+
+  return {
+    matchedSkillCount: rows.reduce((sum, row) => sum + row.skillCount, 0),
+    matchedCliCount: rows.reduce((sum, row) => sum + row.cliCount, 0),
+    memberCount: rows.length,
+    rows,
+    scannedSkillCount: skills.length,
+    scannedCliCount: clis.length,
+    unmatchedCreators,
+  };
+}
+
 function escapeMarkdownCell(value) {
   const text = asString(value).replace(/\|/g, "\\|");
   return text || "-";
 }
 
-export function formatTable(rows) {
+export function formatTable(rows, options = {}) {
+  if (options.type === "all" && rows.length > 0 && "cliCount" in rows[0]) {
+    return formatAllTable(rows);
+  }
   const lines = [
     "| name | mis | empId | role | skills | skill names |",
     "| --- | --- | --- | --- | ---: | --- |",
@@ -224,11 +325,51 @@ export function formatTable(rows) {
   return lines.join("\n");
 }
 
+function formatAllTable(rows) {
+  const lines = [
+    "| name | mis | role | skills | skill names | clis | cli names |",
+    "| --- | --- | --- | ---: | --- | ---: | --- |",
+  ];
+
+  for (const row of rows) {
+    lines.push(
+      [
+        escapeMarkdownCell(row.name),
+        escapeMarkdownCell(row.mis),
+        escapeMarkdownCell(row.role || "member"),
+        String(row.skillCount),
+        escapeMarkdownCell((row.skillNames || []).join("; ")),
+        String(row.cliCount || 0),
+        escapeMarkdownCell((row.cliNames || []).join("; ")),
+      ].join(" | ").replace(/^/, "| ").replace(/$/, " |"),
+    );
+  }
+
+  return lines.join("\n");
+}
+
 function csvCell(value) {
   return `"${asString(value).replace(/"/g, '""')}"`;
 }
 
-export function formatCsv(rows) {
+export function formatCsv(rows, options = {}) {
+  if (options.type === "all" && rows.length > 0 && "cliCount" in rows[0]) {
+    const lines = ["name,mis,role,skillCount,skillNames,cliCount,cliNames"];
+    for (const row of rows) {
+      lines.push(
+        [
+          csvCell(row.name),
+          csvCell(row.mis),
+          csvCell(row.role || "member"),
+          String(row.skillCount),
+          csvCell((row.skillNames || []).join("; ")),
+          String(row.cliCount || 0),
+          csvCell((row.cliNames || []).join("; ")),
+        ].join(","),
+      );
+    }
+    return lines.join("\n");
+  }
   const lines = ["name,mis,empId,role,skillCount,skillNames"];
   for (const row of rows) {
     lines.push(
@@ -316,6 +457,7 @@ function parseArgs(argv) {
   const options = {
     env: "prod",
     format: "md",
+    type: "all",
     apiPageSize: DEFAULT_API_PAGE_SIZE,
     pageSize: DEFAULT_PAGE_SIZE,
     refresh: false,
@@ -330,6 +472,7 @@ function parseArgs(argv) {
     };
 
     if (arg === "--gid") options.gid = readValue();
+    else if (arg === "--type") options.type = readValue();
     else if (arg === "--format") options.format = readValue();
     else if (arg === "--env") options.env = readValue();
     else if (arg === "--api-page-size") options.apiPageSize = Number(readValue());
@@ -368,6 +511,9 @@ function parseArgs(argv) {
   if (!["md", "json", "csv"].includes(options.format)) {
     throw new Error("--format must be one of: md, json, csv");
   }
+  if (!["all", "skill", "cli"].includes(options.type)) {
+    throw new Error("--type must be one of: all, skill, cli");
+  }
   if (hasCreatedDateFilter(options)) {
     const from = parseDateTime(options.createdFrom);
     const to = parseDateTime(options.createdTo, { endOfDay: true });
@@ -384,6 +530,7 @@ function usage() {
     "Usage: node scripts/group_skill_stats.mjs [--gid <daxiangGroupId> | --mis-list <json|csv> | --mis-file <path>] [options]",
     "",
     "Options:",
+    "  --type all|skill|cli        Query type: all (default), skill, or cli",
     "  --format md|json|csv        Output format. Default: md",
     "  --env dev|test|prod         Friday environment. Default: prod",
     "  --api-page-size <1-5000>    Direct Friday API page size. Default: 2000",
@@ -549,6 +696,50 @@ async function fetchFridaySkillsViaApi(options) {
   return allItems;
 }
 
+async function fetchFridayClisViaApi(options) {
+  ensureCibaToken(options);
+  const accessToken = readFridayAccessToken(options);
+  if (!accessToken) {
+    throw new Error("No cached Friday access token found. Retry with --ciba <mis> or --token <access-token>.");
+  }
+
+  const baseUrl = FRIDAY_BASE_URLS[options.env];
+  if (!baseUrl) throw new Error(`unsupported Friday environment: ${options.env}`);
+
+  const pageSize = DEFAULT_CLI_API_PAGE_SIZE;
+  const allItems = [];
+  let page = 1;
+  let total = Infinity;
+
+  while (allItems.length < total) {
+    const url = new URL(`${baseUrl}/mcphub-api/cli/list`);
+    url.searchParams.set("page", String(page));
+    url.searchParams.set("pageSize", String(pageSize));
+
+    const response = await fetch(url, {
+      headers: {
+        "Content-Type": "application/json",
+        "X-MTSKILLS-SSO-Env": ssoEnvForFridayEnv(options.env),
+        "access-token": accessToken,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`Friday CLI API failed: HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    const items = data.result?.list || [];
+    if (items.length === 0) break;
+    allItems.push(...items);
+    total = data.result?.total ?? total;
+
+    if (options.maxPages && page >= options.maxPages) break;
+    page += 1;
+  }
+
+  return normalizeCliItems(allItems);
+}
+
 function fetchFridaySkillsViaCli(options) {
   const allItems = [];
   let page = 1;
@@ -587,6 +778,14 @@ async function fetchFridaySkills(options) {
   }
 }
 
+async function fetchFridayClis(options) {
+  return fetchFridayClisViaApi(options);
+}
+
+function defaultCliCacheFile(env) {
+  return join(tmpdir(), "group-skill-stats", `friday-clis-${env}.json`);
+}
+
 async function loadSkills(options) {
   if (options.skillsFile) {
     return extractSkillItems(readJsonFile(options.skillsFile));
@@ -606,22 +805,52 @@ async function loadSkills(options) {
   return skills;
 }
 
+async function loadClis(options) {
+  if (options.skillsFile) {
+    return extractCliItems(readJsonFile(options.skillsFile));
+  }
+
+  const cacheFile = resolve(options.cacheFile || defaultCliCacheFile(options.env));
+  if (!options.refresh && existsSync(cacheFile)) {
+    const cachedClis = extractCliItems(readJsonFile(cacheFile));
+    if (!hasCreatedDateFilter(options) || cachedClis.some((cli) => cli.createdAt)) {
+      return cachedClis;
+    }
+  }
+
+  const clis = await fetchFridayClis(options);
+  mkdirSync(dirname(cacheFile), { recursive: true });
+  writeFileSync(cacheFile, JSON.stringify(clis, null, 2));
+  return clis;
+}
+
+async function loadItems(options) {
+  if (options.type === "cli") return { clis: await loadClis(options) };
+  if (options.type === "skill") return { skills: await loadSkills(options) };
+  // type === "all"
+  const [skills, clis] = await Promise.all([loadSkills(options), loadClis(options)]);
+  return { skills, clis };
+}
+
 export function formatResult(result, options) {
   const payload = {
     createdFrom: options.createdFrom || null,
     createdTo: options.createdTo || null,
     generatedAt: new Date().toISOString(),
     gid: options.gid || null,
+    type: options.type,
     matchedSkillCount: result.matchedSkillCount,
+    matchedCliCount: result.matchedCliCount ?? undefined,
     memberCount: result.memberCount,
     rows: result.rows,
     scannedSkillCount: result.scannedSkillCount,
+    scannedCliCount: result.scannedCliCount ?? undefined,
     unmatchedCreators: result.unmatchedCreators,
   };
 
   if (options.format === "json") return JSON.stringify(payload, null, 2);
-  if (options.format === "csv") return formatCsv(result.rows);
-  return formatTable(result.rows);
+  if (options.format === "csv") return formatCsv(result.rows, options);
+  return formatTable(result.rows, options);
 }
 
 export function runWithData(membersRaw, skillsRaw, options = {}) {
@@ -638,8 +867,19 @@ async function main() {
   }
 
   const members = loadMembers(options);
-  const skills = await loadSkills(options);
-  const result = aggregateSkillCounts(members, filterSkillsByCreatedAt(skills, options));
+  const loaded = await loadItems(options);
+
+  let result;
+  if (options.type === "all") {
+    const filteredSkills = filterSkillsByCreatedAt(loaded.skills, options);
+    const filteredClis = filterSkillsByCreatedAt(loaded.clis, options);
+    result = aggregateAllCounts(members, filteredSkills, filteredClis);
+  } else if (options.type === "cli") {
+    result = aggregateSkillCounts(members, filterSkillsByCreatedAt(loaded.clis, options));
+  } else {
+    result = aggregateSkillCounts(members, filterSkillsByCreatedAt(loaded.skills, options));
+  }
+
   console.log(formatResult(result, options));
 }
 
