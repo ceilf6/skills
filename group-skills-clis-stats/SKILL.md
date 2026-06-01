@@ -1,5 +1,5 @@
 ---
-name: group-skills&clis-stats
+name: group-skills-clis-stats
 description: Use when counting or ranking Friday/SkillHub skills and/or CLI tools created by members of a Daxiang group, especially requests involving group members, group skill statistics, CLI statistics, creator counts, skills per person, Friday skills, Friday CLI, or SkillHub contribution summaries.
 ---
 
@@ -27,43 +27,43 @@ npm install -g @it/oa-skills @mtfe/mtskills --registry=http://r.npm.sankuai.com
 3. Run the report. By default (`--type all`) the script fetches both skills and CLI tools in one pass:
 
 ```bash
-node "group-skills&clis-stats/scripts/group_skill_stats.mjs" --format md
+node group-skills-clis-stats/scripts/group_skill_stats.mjs --format md
 ```
 
 For skills only:
 
 ```bash
-node "group-skills&clis-stats/scripts/group_skill_stats.mjs" --type skill --format md
+node group-skills-clis-stats/scripts/group_skill_stats.mjs --type skill --format md
 ```
 
 For CLI tools only:
 
 ```bash
-node "group-skills&clis-stats/scripts/group_skill_stats.mjs" --type cli --format md
+node group-skills-clis-stats/scripts/group_skill_stats.mjs --type cli --format md
 ```
 
 For a direct MIS list:
 
 ```bash
-node "group-skills&clis-stats/scripts/group_skill_stats.mjs" --mis-list '["mis1","mis2"]' --format md
+node group-skills-clis-stats/scripts/group_skill_stats.mjs --mis-list '["mis1","mis2"]' --format md
 ```
 
 For a creation-time range, add one or both bounds. `YYYY-MM-DD` dates are inclusive; `--created-to 2026-05-25` includes the whole day.
 
 ```bash
-node "group-skills&clis-stats/scripts/group_skill_stats.mjs" --created-from 2026-05-01 --created-to 2026-05-25 --format md
+node group-skills-clis-stats/scripts/group_skill_stats.mjs --created-from 2026-05-01 --created-to 2026-05-25 --format md
 ```
 
 Combine `--type` with date filters:
 
 ```bash
-node "group-skills&clis-stats/scripts/group_skill_stats.mjs" --type cli --created-from 2026-05-25 --created-to 2026-05-31 --format md
+node group-skills-clis-stats/scripts/group_skill_stats.mjs --type cli --created-from 2026-05-25 --created-to 2026-05-31 --format md
 ```
 
 4. If Friday authentication fails, retry with CIBA using the user's known MIS, or ask for MIS if unknown:
 
 ```bash
-node "group-skills&clis-stats/scripts/group_skill_stats.mjs" --gid <groupId> --format md --ciba <mis>
+node group-skills-clis-stats/scripts/group_skill_stats.mjs --gid <groupId> --format md --ciba <mis>
 ```
 
 5. Return the Markdown table. If a coverage note is useful, put it after the table and keep it brief; never put non-table text before the result table.
@@ -81,7 +81,7 @@ node "group-skills&clis-stats/scripts/group_skill_stats.mjs" --gid <groupId> --f
 ## Script Options
 
 ```bash
-node "group-skills&clis-stats/scripts/group_skill_stats.mjs" --help
+node group-skills-clis-stats/scripts/group_skill_stats.mjs --help
 ```
 
 Useful options:
