@@ -94,3 +94,9 @@ repo-guard 通过 git submodule 引用本仓库，运行时始终拉取最新版
 # progress-reporter
 
 用于在**飞书**定时 cron 群公告项目进度的技能
+
+# semgrep-scanner
+
+纯本地 Semgrep 静态代码分析 skill，对指定仓库执行全量扫描，查找 Blocker（ERROR）和 Critical（WARNING）级别的安全与质量问题，输出结构化 Markdown 报告。
+
+支持 TypeScript、JavaScript、Python、HTML、CSS 等 30+ 语言。核心设计点是精准识别源码目录、排除依赖和生成文件（node_modules、.venv、onnx 模型等），避免产生大量无效告警。工作流程：安装 Semgrep → 识别源码目录 → 执行扫描 → 二次过滤 → 获取代码上下文 → 生成带修复建议的报告。
